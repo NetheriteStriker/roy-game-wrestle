@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demolisher Challenge — Demolisher Battles</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Persistent Top Bar -->
+    <header class="top-bar">
+      <div id="coin-hud" class="coin-badge" aria-label="Persistent Coin Counter">
+        <span class="coin-icon" aria-hidden="true">★</span>
+        <span class="coin-label">COINS</span>
+        <span id="coin-value" class="coin-value">0</span>
+      </div>
+
+      <div class="top-actions">
+        <button id="btn-controls" class="pill-btn" type="button" title="View Controls">
+          Controls
+        </button>
+        <button id="btn-mute" class="pill-btn" type="button" title="Toggle Sound">
+          Sound: ON
+        </button>
+      </div>
+    </header>
+
+    <!-- HOME SCREEN -->
+    <section id="screen-home" class="screen active">
+      <div class="home-header">
+        <svg class="bubble-title-svg" viewBox="0 0 920 128" role="img" aria-label="Demolisher Battles">
+          <defs>
+            <linearGradient id="bubbleGold" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#fff7b2" />
+              <stop offset="42%" stop-color="#ffd43b" />
+              <stop offset="100%" stop-color="#ff6b00" />
+            </linearGradient>
+            <filter id="bubbleShadow" x="-8%" y="-12%" width="116%" height="135%">
+              <feDropShadow dx="0" dy="6" stdDeviation="4" flood-color="#050311" flood-opacity="0.85" />
+            </filter>
+          </defs>
+          <g filter="url(#bubbleShadow)">
+            <text
+              x="460"
+              y="88"
+              text-anchor="middle"
+              class="bubble-title-stroke"
+            >Demolisher Battles</text>
+            <text
+              x="460"
+              y="88"
+              text-anchor="middle"
+              fill="url(#bubbleGold)"
+              class="bubble-title-fill"
+            >Demolisher Battles</text>
+          </g>
+        </svg>
+        <p class="home-subtitle">DEMOLISHER CHALLENGE • GRAND PRIX CHAMPIONSHIP</p>
+      </div>
+
+      <div class="home-arena-wrap">
+        <canvas id="home-canvas"></canvas>
+      </div>
+
+      <nav class="home-menu-dock" aria-label="Main Menu">
+        <button id="btn-start-prix" class="arcade-btn arcade-btn--primary" type="button">
+          <span class="btn-title">Start New Prix</span>
+          <span class="btn-sub">4 Levels • 6 Difficulties</span>
+        </button>
+
+        <button id="btn-resume-prix" class="arcade-btn arcade-btn--cyan" type="button" disabled>
+          <span class="btn-title">Resume Current Prix</span>
+          <span id="resume-prix-sub" class="btn-sub">No Active Save</span>
+        </button>
+
+        <button id="btn-achievements" class="arcade-btn arcade-btn--gold" type="button">
+          <span class="btn-title">Achievements</span>
+          <span id="home-ach-sub" class="btn-sub">0 / 11 Unlocked</span>
+        </button>
+
+        <button id="btn-minigames" class="arcade-btn arcade-btn--purple" type="button">
+          <span class="btn-title">Mini Games</span>
+          <span class="btn-sub">3 Arcade Modes</span>
+        </button>
+      </nav>
+    </section>
+
+    <!-- DIFFICULTY SELECTION SCREEN -->
+    <section id="screen-difficulty" class="screen">
+      <div class="subscreen-header">
+        <button id="btn-diff-back" class="back-btn" type="button">← Back</button>
+        <div>
+          <h2>Select Grand Prix Difficulty</h2>
+          <p class="muted">4 Levels × 10 Rounds per Level • Enemy always strikes first • Need 700+ Coins per Level</p>
+        </div>
+      </div>
+      <div id="difficulty-grid" class="difficulty-grid"></div>
+    </section>
+
+    <!-- COMBAT SCREEN -->
+    <section id="screen-combat" class="screen">
+      <div class="combat-hud">
+        <div class="fighter-hud fighter-hud--player">
+          <div class="fighter-hud-top">
+            <span class="fighter-name">DEMOLISHER</span>
+            <span id="hud-player-hp-text" class="hp-nums">2,000 / 2,000</span>
+          </div>
+          <div class="hp-bar-track">
+            <div id="hud-player-hp-fill" class="hp-bar-fill hp-bar-fill--player"></div>
+          </div>
+          <div class="fighter-meta">
+            <span id="hud-attack-bonus" class="meta-chip">+0 ATK Bonus</span>
+            <span id="hud-spin-badge" class="meta-chip meta-chip--hidden">Spin: 0.0s</span>
+          </div>
+        </div>
+
+        <div class="match-center-hud">
+          <div id="hud-match-badge" class="match-badge">LVL 1 • RD 1/10</div>
+          <div id="hud-diff-badge" class="diff-pill">EASY</div>
+          <div class="level-coin-meter">
+            <span>Level Coins:</span>
+            <strong id="hud-level-coins">0 / 700</strong>
+          </div>
+          <button id="btn-combat-menu" class="mini-pause-btn" type="button">Menu / Pause</button>
+        </div>
+
+        <div class="fighter-hud fighter-hud--enemy">
+          <div class="fighter-hud-top">
+            <span id="hud-enemy-hp-text" class="hp-nums">1,000 / 1,000</span>
+            <span id="hud-enemy-name" class="fighter-name">EL COBRA</span>
+          </div>
+          <div class="hp-bar-track">
+            <div id="hud-enemy-hp-fill" class="hp-bar-fill hp-bar-fill--enemy"></div>
+          </div>
+          <div class="fighter-meta fighter-meta--right">
+            <span id="hud-enemy-title" class="meta-chip">Venom Luchador</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="combat-canvas-wrap">
+        <canvas id="combat-canvas"></canvas>
+      </div>
+
+      <div class="combat-footer">
+        <div id="hud-abilities-bar" class="abilities-bar"></div>
+        <div class="controls-strip">
+          <span><b>Arrows</b> Move/Fly</span>
+          <span><b>Space</b> Jump</span>
+          <span><b>D</b> Duck</span>
+          <span><b>S</b> Sidestep</span>
+          <span><b>T</b> Spin</span>
+          <span><b>L-Click / R-Click</b> Punches</span>
+          <span><b>K</b> Kick</span>
+          <span><b>G</b> Grab</span>
+          <span><b>P</b> Throw</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACHIEVEMENTS SCREEN -->
+    <section id="screen-achievements" class="screen">
+      <div class="subscreen-header">
+        <button id="btn-ach-back" class="back-btn" type="button">← Back</button>
+        <div>
+          <h2>Championship Achievements</h2>
+          <p id="ach-summary-text" class="muted">0 of 11 Milestones Completed</p>
+        </div>
+      </div>
+      <div id="achievements-grid" class="achievements-grid"></div>
+    </section>
+
+    <!-- MINI GAMES SELECTION SCREEN -->
+    <section id="screen-minigames" class="screen">
+      <div class="subscreen-header">
+        <button id="btn-mg-back" class="back-btn" type="button">← Back</button>
+        <div>
+          <h2>Arcade Mini Games</h2>
+          <p class="muted">Earn extra coins in three standalone challenges</p>
+        </div>
+      </div>
+      <div class="minigames-grid">
+        <article class="mg-card">
+          <div class="mg-badge">50 COINS / HIT</div>
+          <h3>Punching Targets</h3>
+          <p>Targets fly across the arena from both sides. Move with Arrow Keys and punch as many as possible before the 45s timer runs out!</p>
+          <div class="mg-controls">Controls: <b>Arrows</b> Move • <b>Space / Up</b> Jump • <b>L / R Click</b> Punch</div>
+          <button class="arcade-btn arcade-btn--gold mg-play-btn" data-mg="punching" type="button">Play Punching Targets</button>
+        </article>
+
+        <article class="mg-card">
+          <div class="mg-badge">150 COINS WIN</div>
+          <h3>Demolisher Run</h3>
+          <p>Sprint down the gauntlet! Outrun relentless pursuing wrestlers while timing vertical swinging knives and weaving past horizontal moving cutters.</p>
+          <div class="mg-controls">Controls: <b>Arrow Keys</b> Sprint &amp; Weave</div>
+          <button class="arcade-btn arcade-btn--cyan mg-play-btn" data-mg="run" type="button">Play Demolisher Run</button>
+        </article>
+
+        <article class="mg-card">
+          <div class="mg-badge">150 COINS WIN</div>
+          <h3>Aerial Battle</h3>
+          <p>Mid-air free-fall brawl against a randomized challenger under zero-footing physics! Unstable spins, momentum drift, and sky slams.</p>
+          <div class="mg-controls">Controls: <b>Arrows</b> Thrust • <b>L/R Click</b> Punch • <b>K</b> Kick • <b>G/P</b> Grab/Throw</div>
+          <button class="arcade-btn arcade-btn--purple mg-play-btn" data-mg="aerial" type="button">Play Aerial Battle</button>
+        </article>
+      </div>
+    </section>
+
+    <!-- MINI GAME PLAY SCREEN -->
+    <section id="screen-minigame-play" class="screen">
+      <div class="mg-play-hud">
+        <button id="btn-mg-exit" class="back-btn" type="button">← Exit Mini Game</button>
+        <div class="mg-stat-pill">
+          <span id="mg-hud-label-1">STAT</span>
+          <strong id="mg-hud-val-1">0</strong>
+        </div>
+        <div class="mg-stat-pill">
+          <span id="mg-hud-label-2">STAT</span>
+          <strong id="mg-hud-val-2">0</strong>
+        </div>
+        <div class="mg-stat-pill mg-stat-pill--gold">
+          <span id="mg-hud-label-3">REWARD</span>
+          <strong id="mg-hud-val-3">0</strong>
+        </div>
+      </div>
+
+      <div class="combat-canvas-wrap">
+        <canvas id="minigame-canvas"></canvas>
+      </div>
+
+      <div class="mg-play-footer">
+        <span id="mg-controls-hint">Arrow Keys to control</span>
+      </div>
+    </section>
+
+    <!-- MODAL OVERLAY -->
+    <div id="modal-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true">
+      <div id="modal-card" class="modal-card"></div>
+    </div>
+
+    <!-- TOAST NOTIFICATIONS -->
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
