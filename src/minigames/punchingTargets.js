@@ -132,10 +132,15 @@ export function startPunchingTargets({ canvas, onHudUpdate, onPunchLanded, onCom
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
       e.preventDefault();
     }
-    const isRepeat = keys.has(e.code);
+    const isRepeat = e.repeat || keys.has(e.code);
     keys.add(e.code);
 
-    if (!ended && !isRepeat && (e.code === 'Space' || e.code === 'ArrowUp') && player.jumpsRemaining > 0) {
+    if (
+      !ended &&
+      !isRepeat &&
+      (e.code === 'KeyJ' || e.code === 'Space' || e.code === 'ArrowUp') &&
+      player.jumpsRemaining > 0
+    ) {
       const isFirstJump = player.z <= 1;
       player.vz = isFirstJump ? 690 : 620;
       player.z = Math.max(player.z, 1);
@@ -146,6 +151,9 @@ export function startPunchingTargets({ canvas, onHudUpdate, onPunchLanded, onCom
   }
   function onKeyUp(e) {
     keys.delete(e.code);
+  }
+  function onBlur() {
+    keys.clear();
   }
   function onMouseDown(e) {
     if (ended) return;
@@ -164,8 +172,18 @@ export function startPunchingTargets({ canvas, onHudUpdate, onPunchLanded, onCom
 
   window.addEventListener('keydown', onKeyDown);
   window.addEventListener('keyup', onKeyUp);
+  window.addEventListener('blur', onBlur);
   canvas.addEventListener('mousedown', onMouseDown);
   canvas.addEventListener('contextmenu', onContextMenu);
+
+  window.__DEMOLISHER_STATE__ = () => ({
+    mode: 'punching',
+    x: player.x,
+    y: player.y,
+    z: player.z,
+    vz: player.vz,
+    jumpsRemaining: player.jumpsRemaining
+  });
 
   playBell();
   let prevTs = performance.now();
@@ -305,7 +323,7 @@ export function startPunchingTargets({ canvas, onHudUpdate, onPunchLanded, onCom
       secondaryValue: `${scoreHits}`,
       tertiaryLabel: 'COINS WON',
       tertiaryValue: `${coinsEarned}`,
-      controlsHint: 'Arrow Left/Right: Move • Space / Up: Jump (Double Jump!) • Down: Fast Fall • L / R Click: Punch'
+      controlsHint: 'Arrow Left/Right: Move • J / Space / Up: Jump (Double Jump!) • Down: Fast Fall • L / R Click: Punch'
     });
 
     rafId = requestAnimationFrame(frame);
@@ -317,8 +335,10 @@ export function startPunchingTargets({ canvas, onHudUpdate, onPunchLanded, onCom
     destroy() {
       running = false;
       if (rafId !== null) cancelAnimationFrame(rafId);
+      delete window.__DEMOLISHER_STATE__;
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
+      window.removeEventListener('blur', onBlur);
       canvas.removeEventListener('mousedown', onMouseDown);
       canvas.removeEventListener('contextmenu', onContextMenu);
     }

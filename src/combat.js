@@ -342,16 +342,23 @@ export function startCombatSession({
       e.preventDefault();
     }
     if (paused || ended) return;
-    const isRepeat = keys.has(e.code);
+    const isRepeat = e.repeat || keys.has(e.code);
     keys.add(e.code);
 
-    if (e.code === 'Space' && !isRepeat && canPlayerAct() && !player.grabbingEnemy && !player.isFlying && player.z <= 0.5) {
-      player.vz = 580;
+    if (
+      (e.code === 'KeyJ' || e.code === 'Space') &&
+      !isRepeat &&
+      canPlayerAct() &&
+      !player.grabbingEnemy &&
+      !player.isFlying &&
+      player.z <= 0.5
+    ) {
+      player.vz = 620;
       player.z = 1;
       if (player.state === 'duck') player.state = 'idle';
       playJump();
       spawnParticles(player.x, player.y, '#cbd5e1', 6);
-    } else if (e.code === 'KeyD' && canPlayerAct() && !player.grabbingEnemy) {
+    } else if (e.code === 'KeyD' && canPlayerAct() && !player.grabbingEnemy && player.z <= 0.5) {
       player.state = 'duck';
       player.stateTimer = 0.35;
     } else if (e.code === 'KeyS' && canPlayerAct() && !isRepeat && !player.grabbingEnemy) {
@@ -381,6 +388,10 @@ export function startCombatSession({
     keys.delete(e.code);
   }
 
+  function onBlur() {
+    keys.clear();
+  }
+
   function onMouseDown(e) {
     if (paused || ended) return;
     if (e.button === 0) {
@@ -397,8 +408,19 @@ export function startCombatSession({
 
   window.addEventListener('keydown', onKeyDown);
   window.addEventListener('keyup', onKeyUp);
+  window.addEventListener('blur', onBlur);
   canvas.addEventListener('mousedown', onMouseDown);
   canvas.addEventListener('contextmenu', onContextMenu);
+
+  window.__DEMOLISHER_STATE__ = () => ({
+    mode: 'combat',
+    x: player.x,
+    y: player.y,
+    z: player.z,
+    vz: player.vz,
+    state: player.state,
+    introTimer
+  });
 
   // Bell at match start
   playBell();
@@ -470,7 +492,7 @@ export function startCombatSession({
     }
 
     // Player Duck hold
-    if (keys.has('KeyD') && canPlayerAct() && !player.grabbingEnemy && player.state !== 'spin') {
+    if (keys.has('KeyD') && canPlayerAct() && !player.grabbingEnemy && player.state !== 'spin' && player.z <= 0.5) {
       if (['idle', 'walk', 'duck'].includes(player.state)) {
         player.state = 'duck';
         player.stateTimer = 0.12;
@@ -509,7 +531,7 @@ export function startCombatSession({
     if (player.isFlying) {
       player.vz = 0;
     } else if (player.z > 0 || player.vz > 0) {
-      player.vz -= 1550 * dt;
+      player.vz -= 1500 * dt;
       player.z += player.vz * dt;
       if (player.z <= 0) {
         player.z = 0;
@@ -872,8 +894,10 @@ export function startCombatSession({
     destroy() {
       running = false;
       if (rafId !== null) cancelAnimationFrame(rafId);
+      delete window.__DEMOLISHER_STATE__;
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
+      window.removeEventListener('blur', onBlur);
       canvas.removeEventListener('mousedown', onMouseDown);
       canvas.removeEventListener('contextmenu', onContextMenu);
     }

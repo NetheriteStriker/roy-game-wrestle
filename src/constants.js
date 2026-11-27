@@ -208,7 +208,7 @@ export const ACHIEVEMENTS = [
 
 export const CONTROLS_REFERENCE = [
   { key: 'Arrow Keys', action: 'Move / Aerial Steering' },
-  { key: 'Space', action: 'Jump (evades ground attacks)' },
+  { key: 'J / Space', action: 'Jump (evades ground attacks)' },
   { key: 'D', action: 'Duck (evades high attacks)' },
   { key: 'S', action: 'Sidestep (lateral evasion)' },
   { key: 'T', action: 'Spin (Turn in place)' },
